@@ -127,7 +127,7 @@ function regexp_match(re)
 }
 function match_by_material(key)
 {
-	var re = RegExp("【材料】[^【]*▽"+key+"x");
+	var re = RegExp("(【材料】|【配置材料】|【建造材料】)[^【]*▽"+key+"x");
 	return regexp_match(re);
 }
 function match_by_item(key)
@@ -150,6 +150,8 @@ function basic_format(result)
 		r = textToCDATA(r)
 		r = r.replace(/^[^【]+/, "<span class=\"clickable\" onclick=\"search_material('$&', 'result');\">$&</span>");
 		r = replace_clickable(r, "【材料】", "search_item");
+		r = replace_clickable(r, "【配置材料】", "search_item");
+		r = replace_clickable(r, "【建造材料】", "search_item");
 		r = replace_clickable(r, "獲得物】", "search_material");
 		r = replace_clickable(r, "収穫物】", "search_material");
 		r = r.replace(/【/g, "\n    【");
@@ -182,6 +184,8 @@ function list_format(result)
 		var item_name = RegExp.lastMatch;
 		r = RegExp.rightContext;
 		r = replace_clickable(r, "【材料】", "search_item");
+		r = replace_clickable(r, "【配置材料】", "search_item");
+		r = replace_clickable(r, "【建造材料】", "search_item");
 		r = replace_clickable(r, "獲得物】", "search_material");
 		r = replace_clickable(r, "収穫物】", "search_material");
 		r = r.replace(/【/g, "\n    【");
@@ -220,14 +224,14 @@ function search_universal_material(key, result_id)
 		document.getElementById(result_id).innerHTML = "<div>アイテム「" + key + "」は見つかりませんでした</div>"
 		return;
 	}
-	document.getElementById(result_id).innerHTML = universal_material_format(key, result);
+	document.getElementById(result_id).innerHTML = universal_material_format(key, result) + basic_format(result);
 }
 function universal_material_format(item, result)
 {
 	var s = "";
 	s += "<table>";
 	s += "<caption class=\"clickable\" onclick=\"search_material('" + textToCDATA(item) + "', 'result');\">" + textToCDATA(item) + "</caption>";
-	s += "<tr><th>材料</th><th>" + textToCDATA(item) + "</th></tr>";
+	s += "<tr><th>素材</th><th>" + textToCDATA(item) + "</th></tr>";
 	for(var i in result) {
 		var r = result[i];
 		if(r.match(/【獲得数】([0-9]+)/)) {
@@ -237,7 +241,8 @@ function universal_material_format(item, result)
 		}
 		r.match(/【材料】([^【]*)/);
 		var material = textToCDATA(RegExp.$1);
-		material = material.replace(/▽([^<x]+)x/g, "▽<span class=\"clickable\" onclick=\"search_item('$1', 'result');\">$1</span>x");
+		material = material.replace(/▽練磨剤:祝福の彫刻刀x1/ ,"");
+		material = material.replace(/▽([^<x]+)x.*/, "<span class=\"clickable\" onclick=\"search_item('$1', 'result');\">$1</span>");
 		s += "<tr><td>" + material + "</td><td>" + number + "</td></tr>";
 	}
 	s += "</table>";
@@ -252,9 +257,7 @@ search_item_func = {
 	"破砕した香辛料" : search_universal_material,
 	"いぶした薬剤" : search_universal_material,
 	"濃縮された果汁" : search_universal_material,
-	"手入れした肉" : search_universal_material,
-	"夜明けの湖添加剤" : search_universal_material,
-	"輝く水埃" : search_universal_material
+	"手入れした肉" : search_universal_material
 };
 
 function textToCDATA(s)
