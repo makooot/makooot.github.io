@@ -6,20 +6,21 @@
 //
 
 dictdata = "";
-dict_filename = "";
 function aadict_init(data_filename, menu_filename, menu_id, result_id)
 {
 	read_dict_data(data_filename);
 	read_menu(menu_filename, menu_id, result_id);
 }
 
-function read_dict_data(filename)
+function read_dict_data(filename, hook)
 {
 	var req = new XMLHttpRequest();
 	req.open("GET", filename, true);
 	req.onload = function() {
-		dictdata = req.responseText.split(/\n/);
-		dict_filename = filename;
+		dictdata = req.responseText.split((/\r\n|\r|\n/));
+		if(hook) {
+			hook();
+		}
 	}
 	req.send();
 }
@@ -29,7 +30,7 @@ function read_menu(filename, menu_id, result_id)
 	var req = new XMLHttpRequest();
 	req.open("GET", filename, true);
 	req.onload = function() {
-		var response = req.responseText.split(/\n/);
+		var response = req.responseText.split((/\r\n|\r|\n/));
 		var menu = "";
 		menu = "<ul>";
 		var group_opened = false;
