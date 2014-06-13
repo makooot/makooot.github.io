@@ -9,7 +9,7 @@
 #result {
 	position :absolute;
 	top: 100px;
-	left: 250px;
+	left: 310px;
 	bottom: auto;
 	right: auto;
 	width: auto
@@ -20,7 +20,7 @@
 	left: 5px;
 	bottom: auto;
 	right: 200px;
-	width: 240px;
+	width: 300px;
 }
 #searchform {
 	border-style : none none solid none;
@@ -33,6 +33,12 @@
 	border: dotted 1px gray  ;
 	cursor: pointer;
 	margin: 0 5px 0 0;
+}
+.expander-triangle {
+	font-size: x-small;
+	cursor: pointer;
+	background-color: blue;
+	color: white;
 }
 .clickable {
 	color: blue;

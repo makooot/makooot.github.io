@@ -145,22 +145,29 @@ function match_by_hatvest(key)
 function basic_format(result)
 {
 	var s = "";
-	s += "<pre>"
+	s += "<div>"
 	for(var i in result) {
 		var r = result[i];
 		r = textToCDATA(r)
-		r = r.replace(/^[^【]+/, "<span class=\"clickable\" onclick=\"search_material('$&', 'result');\">$&</span>");
+		r = r.replace(/^[^【]+/, "<span class=\"clickable\" onclick=\"search_material('$&', 'result');\">$&</span>"+
+		" <span class=\"expander-triangle\" onclick=\"expdexp(this.nextSibling, this, ['▼', '▲']);\">▲</span>"+
+		"<pre style=\"display:block;\">");
 		r = replace_clickable(r, "【材料】", "search_item");
 		r = replace_clickable(r, "【配置材料】", "search_item");
 		r = replace_clickable(r, "【建造材料】", "search_item");
-		r = replace_clickable(r, "獲得物】", "search_material");
-		r = replace_clickable(r, "収穫物】", "search_material");
+		r = replace_clickable(r, "【収穫時獲得物】", "search_material");
+		r = replace_clickable(r, "【加工時獲得物】", "search_material");
+		r = replace_clickable(r, "【伐採時獲得物】", "search_material");
+		r = replace_clickable(r, "【採集時獲得物】", "search_material");
+		r = replace_clickable(r, "【獲得物】", "search_material");
+		r = replace_clickable(r, "【収穫物】", "search_material");
 		r = r.replace(/【/g, "\n    【");
 		r = r.replace(/▽/g, "\n        ▽");
+		r = r+"</pre>";
 		r = r + "\n \n";
-		s += r;
+		s += "<div>" + r + "</div>";
 	}
-	s += "</pre>";
+	s += "</div>";
 	return s;
 }
 
@@ -187,14 +194,18 @@ function list_format(result)
 		r = replace_clickable(r, "【材料】", "search_item");
 		r = replace_clickable(r, "【配置材料】", "search_item");
 		r = replace_clickable(r, "【建造材料】", "search_item");
-		r = replace_clickable(r, "獲得物】", "search_material");
-		r = replace_clickable(r, "収穫物】", "search_material");
+		r = replace_clickable(r, "【収穫時獲得物】", "search_material");
+		r = replace_clickable(r, "【加工時獲得物】", "search_material");
+		r = replace_clickable(r, "【伐採時獲得物】", "search_material");
+		r = replace_clickable(r, "【採集時獲得物】", "search_material");
+		r = replace_clickable(r, "【獲得物】", "search_material");
+		r = replace_clickable(r, "【収穫物】", "search_material");
 		r = r.replace(/【/g, "\n    【");
 		r = r.replace(/▽/g, "\n        ▽");
 		r = r + "\n \n";
 		s += "<div>";
-		s += "<span class=\"expander\" onclick=\"expdexp(this.nextSibling.nextSibling, this);\">+</span>";
 		s += "<span class=\"clickable\" onclick=\"search_material('" + item_name + "', 'result');\">" + item_name + "</span>";
+		s += " <span class=\"expander-triangle\" onclick=\"expdexp(this.nextSibling, this, ['▼', '▲']);\">▼</span>";
 		s += "<pre style=\"display:none;\">";
 		s += r;
 		s += "</pre>";
@@ -211,7 +222,7 @@ function replace_clickable(s, attr, search_func)
 	if(m.indexOf("▽")==-1) {
 		m = m.replace(/^(.*)x/, "】<span class=\"clickable\" onclick=\""+search_func+"l('$1', 'result');\">$1</span>x");
 	} else {
-		m = m.replace(/▽([^<x]+)x/g, "▽<span class=\"clickable\" onclick=\""+search_func+"('$1', 'result');\">$1</span>x");
+		m = m.replace(/▽([^x]+)x/g, "▽<span class=\"clickable\" onclick=\""+search_func+"('$1', 'result');\">$1</span>x");
 	}
 	s = s.replace(re, attr+m);
 	return s;
@@ -270,14 +281,21 @@ function textToCDATA(s)
 	return s;
 }
 
-function expdexp(t, m)
+function expdexp(t, m, s)
 {
+	if(arguments.length>=3) {
+		var expander_string = s[0];
+		var dexpander_string = s[1];
+	} else {
+		var expander_string = "+";
+		var dexpander_string = "-";
+	}
 	if(t.style.display=="none") {
 		t.style.display = "";
-		m.innerHTML = "-";
+		m.innerHTML = dexpander_string;
 	} else {
 		t.style.display = "none";
-		m.innerHTML = "+";
+		m.innerHTML = expander_string;
 	}
 }
 
