@@ -8,20 +8,65 @@
 }
 #result {
 	position :absolute;
-	top: 100px;
+	top: 80px;
 	left: 310px;
 	bottom: auto;
 	right: auto;
 	width: auto
 }
-#post {
+#tabs {
 	position: absolute;
-	top: 100px;
+	top: 80px;
+	left: 5px;
+	bottom: 200px;
+	right: 310px;
+	width: 300px;
+	vertical-align: bottom;
+}
+#tabs input {
+	display:none;
+}
+#menu, #hist {
+	position: absolute;
+	top: 110px;
 	left: 5px;
 	bottom: auto;
-	right: 200px;
+	right: 310px;
 	width: 300px;
 }
+#menu-tab:checked ~ label {
+	background-color: navy;
+	color: white;
+	font-weight: bold;
+}
+#menu-tab:checked ~ div {
+	display: block;
+}
+#menu-tab ~ label {
+	background-color: gray;
+	color: white;
+	font-weight: bold;
+}
+#menu-tab ~ div {
+	display: none;
+}
+#hist-tab:checked ~ label {
+	background-color: navy;
+	color: white;
+	font-weight: bold;
+}
+#hist-tab:checked ~ div {
+	display: block;
+}
+#hist-tab ~ label {
+	background-color: gray;
+	color: white;
+	font-weight: bold;
+}
+#hist-tab ~ div {
+	display: none;
+}
+
 #searchform {
 	border-style : none none solid none;
 	border-color: black;
@@ -43,6 +88,13 @@
 .clickable {
 	color: blue;
 	text-decoration: underline;
+	cursor: pointer;
+}
+
+.round-square {
+	border-radius: 3px;
+	border: solid 1px red;
+	color:red;
 	cursor: pointer;
 }
 

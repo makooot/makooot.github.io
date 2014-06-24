@@ -5,7 +5,7 @@
 <script type="text/javascript" src="aadictview.js"></script>
 <link rel="stylesheet" href="aadictview.css" type="text/css">
 </head>
-<body onload="aadict_init('ArcheAgeJPDict.txt', 'ArcheAgeMenu.txt', 'menu', 'result');">
+<body onload="aadict_init('ArcheAgeJPDict.txt', 'ArcheAgeMenu.txt', 'menu', 'result', 'hist');">
 <div id="search">
 <form name="search_form" id="searchform">
 ArcheAge (JP) 製作辞典＋ <br />
@@ -16,11 +16,12 @@ ArcheAge (JP) 製作辞典＋ <br />
 <div id="result">
 </div>
 <div id="post">
-<div id="menu">
+<div id="tabs">
+<span><input type="radio" name="tab" id="menu-tab" data-tab-body="menu" onchange="change_tab('tab')" checked="checked"/><label for="menu-tab">メニュー</label></span>
+<span><input type="radio" name="tab" id="hist-tab" data-tab-body="hist" onchange="change_tab('tab')" /><label for="hist-tab"> 履歴 </label></span>
 </div>
-<div>
-<a href="ArcheAgeJPDict.txt" target="_blank">製作辞典データ</a>
-</div>
+<div id="menu"></div>
+<div id="hist"></div>
 </div>
 </body>
 </html>

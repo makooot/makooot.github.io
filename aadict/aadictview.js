@@ -6,10 +6,15 @@
 //
 
 dictdata = "";
-function aadict_init(data_filename, menu_filename, menu_id, result_id)
+hist_id = "";
+function aadict_init(data_filename, menu_filename, menu_id, result_id_, hist_id_)
 {
+	result_id = result_id_;
+	hist_id = hist_id_;
 	read_dict_data(data_filename);
-	read_menu(menu_filename, menu_id, result_id);
+	read_menu(menu_filename, menu_id, result_id_);
+	change_tab("tab");
+	hist_init(hist_id_);
 }
 
 function read_dict_data(filename, hook)
@@ -31,31 +36,35 @@ function read_menu(filename, menu_id, result_id)
 	req.open("GET", filename, true);
 	req.onload = function() {
 		var response = req.responseText.split((/\r\n|\r|\n/));
-		var menu = "";
-		menu = "<ul>";
-		var group_opened = false;
-		var group_name = "";
+		
+		var menu_tree = [];
 		for(var i in response) {
 			var s = response[i];
 			if(s=="") {
 				continue;
 			}
-			if(s.substr(0,1)=="\t") {
-				//menu item
-				s = s.substr(1);
-				menu += "<li class=\"clickable\" onclick=\"category_list('【分類】"+group_name+"/"+s+"', '"+result_id+"');\">"+s+"</li>";
+			if(s.substr(0, 1)=="\t") {
+				menu_tree[menu_tree.length-1].push(s.substr(1));
 			} else {
-				// group
-				if(group_opened) {
-					menu += "</ul></li>";
-				}
-				menu += "<li>";
-				menu += "<span class=\"expander\" onclick=\"expdexp(this.nextSibling.nextSibling, this);\">+</span>";
-				menu += "<span class=\"clickable\" onclick=\"category_list('【分類】"+s+"', '"+result_id+"');\">"+s+"</span>";
-				menu += "<ul style=\"display:none;\">";
-				group_name = s;
-				group_opened = true;
+				menu_tree.push(s, []);
 			}
+		}
+		
+		var menu = "<ul>";
+		while(menu_tree.length > 0) {
+			var group_name = menu_tree.shift();
+			var sub_items = menu_tree.shift();
+
+			menu += "<li>";
+			menu += "<span class=\"expander\" onclick=\"expdexp(this.nextSibling.nextSibling, this);\">+</span>";
+			menu += "<span class=\"clickable\" onclick=\"category_list('【分類】"+group_name+"', '"+result_id+"');\">"+group_name+"</span>";
+			menu += "<ul style=\"display:none;\">";
+
+			for(var i=0; i<sub_items.length-1; i++) {
+				menu += "<li class=\"clickable\" onclick=\"category_list('【分類】"+group_name+"/"+sub_items[i]+"', '"+result_id+"');\">"+sub_items[i]+"</li>";
+			}
+			
+			menu += "</ul></li>";
 		}
 		menu += "</ul>";
 		document.getElementById(menu_id).innerHTML = menu;
@@ -63,61 +72,56 @@ function read_menu(filename, menu_id, result_id)
 	req.send();
 }
 
-function search(key, result_id)
+function search(raw_key, result_id)
 {
-	var search_kind = "";
-	if(key.match(/^(item:|material:|harvest:)(.*)/)) {
+	var search_kind;
+	var key;
+	if(raw_key.match(/^(item:|material:|harvest:)(.*)/)) {
 		search_kind = RegExp.$1;
 		key = RegExp.$2;
+	} else{
+		search_kind = "";
+		key = raw_key;
 	}
-	var match_function = simple_match;
+	var match_function;
+	var target_string;
+	var key_string = textToCDATA(key);
 	switch(search_kind) {
 	case "item:":
-		match_function = match_by_item;
+		match_function = match_by_item_ex;
+		target_string = "アイテム「" + key_string + "」";
 		break;
 	case "material:":
 		match_function = match_by_material;
+		target_string = "「" + key_string + "」を材料とする製作物";
 		break;
 	case "harvest:":
 		match_function = match_by_hatvest;
+		target_string = "収穫物「" + key_string + "」";
 		break;
+	default:
+		match_function = simple_match;
+		target_string = "「" + key_string + "」";
 	}
 	var result = match_function(key)
 	if(result.length==0) {
-		document.getElementById(result_id).innerHTML = "<div>「" + key + "」は見つかりませんでした</div>"
+		document.getElementById(result_id).innerHTML = "<div>" + target_string + "は見つかりませんでした</div>"
 		return;
 	}
-	document.getElementById(result_id).innerHTML = "<div>「" + key + "」の検索結果</div>" + basic_format(result);
-		
+	document.getElementById(result_id).innerHTML = "<div>" + target_string + "の検索結果</div>" + basic_format(result);
+	record_hist(raw_key);
 }
 
 function search_material(key, result_id)
 {
-	var result = match_by_material(key)
-	if(result.length==0) {
-		document.getElementById(result_id).innerHTML = "<div>「" + key + "」を材料にする製作物は見つかりませんでした</div>"
-		return;
-	}
-	document.getElementById(result_id).innerHTML = "<div>「" + key + "」を材料にする製作物の検索結果</div>" + basic_format(result);
-
+	search("material:"+key, result_id);
+	return;
 }
 
 function search_item(key, result_id)
 {
-	if(search_item_func[key]) {
-		search_item_func[key](key, result_id);
-		return;
-	}
-	var result = match_by_item(key)
-	if(result.length==0) {
-		result =  match_by_harvest(key)
-		if(result.length==0) {
-			document.getElementById(result_id).innerHTML = "<div>アイテム「" + key + "」は見つかりませんでした</div>"
-			return;
-		}
-	}
-	document.getElementById(result_id).innerHTML = "<div>アイテム「" + key + "」の検索結果</div>" + basic_format(result);
-
+	search("item:"+key, result_id);
+	return;
 }
 
 function simple_match(key)
@@ -158,6 +162,16 @@ function match_by_harvest(key)
 	key = escape_regexp(key);
 	var re = RegExp("((獲得|収穫)物】"+key+"|(獲得|収穫)物】[^【]*▽"+key+")");
 	return regexp_match(re);
+}
+
+function match_by_item_ex(key)
+{
+	var result = match_by_item(key)
+	if(result.length==0) {
+		result =  match_by_harvest(key)
+	}
+	return result;
+
 }
 
 function basic_format(result)
@@ -290,6 +304,106 @@ search_item_func = {
 	"手入れした肉" : search_universal_material
 };
 
+search_history = (function() {
+	var max_history = 20;
+	return new function() {
+		this.make_key = function(i)  {
+			return "archeage-jp-hist-"+i;
+		};
+		this.get_cookie = function(key) {
+			var re = RegExp(" "+key+"=([^;]+);");
+			if(re.test(" "+document.cookie+";")) {
+				return decodeURIComponent(RegExp.$1);
+			} else {
+				return "";
+			}
+		};
+		this.set_cookie = function(key, value, expires) {
+			if(arguments.length < 3) {
+				expires = "; expires=Thu, 1-Jan-2030 00:00:00 GMT";
+			} else if(expires!="") {
+				expires = "; expires=" + expires;
+			}
+			document.cookie = key + "=" + encodeURIComponent(value) + expires;
+		};
+
+		this.get = function() {
+			var histories = [];
+			for(var i=0;i<max_history; i++) {
+				var hist = this.get_cookie(this.make_key(i));
+				if(hist!="") {
+					histories.push(hist);
+				}
+			}
+			return histories;
+		};
+		this.update = function(delete_item, add_item) {
+			var histories = this.get();
+			if(delete_item!="") {
+				var i = histories.indexOf(delete_item);
+				if(i!=-1) {
+					histories.splice(i, 1);
+				}
+			}
+			if(add_item!="") {
+				histories.unshift(add_item);
+			}
+			for(var i=0;i<max_history; i++) {
+				var item =  histories[i] || "";
+				this.set_cookie(this.make_key(i), item);
+			}
+		};
+		this.clear = function() {
+			for(var i=0;i<max_history; i++) {
+				this.set_cookie(this.make_key(i), "");
+			}
+		};
+		this.record = function(s) {
+			this.update(s, s);
+		};
+		this.del = function(s) {
+			this.update(s, "");
+		};
+	};
+})();
+
+function hist_init(id)
+{
+	redraw_hist();
+}
+
+function redraw_hist()
+{
+	document.getElementById(hist_id).innerHTML = hist_to_html();
+}
+
+function record_hist(x)
+{
+	search_history.record(x);
+	redraw_hist();
+}
+
+function delete_hist(x)
+{
+	search_history.del(x);
+	redraw_hist();
+}
+
+function hist_to_html()
+{
+	var s = "<ul>";
+	var histories = search_history.get();
+	for(var i=0; i<histories.length; i++) {
+		var search_key = histories[i];
+		var name = search_key;
+		s += "<li>" +
+			"<span class=\"clickable\" onclick=\"search('"+textToCDATA(search_key)+"','"+result_id+"');\">"+textToCDATA(name)+"</span> " +
+			"<span class=\"round-square\" onclick=\"delete_hist('"+textToCDATA(name)+"');\">×</span>" +
+			"</li>";
+	}
+	s += "</ul>";
+	return s;
+}
 function textToCDATA(s)
 {
 	s = s.replace(/&/g, "&amp;");
@@ -317,3 +431,17 @@ function expdexp(t, m, s)
 	}
 }
 
+function change_tab(name)
+{
+	var tabs = document.getElementsByName(name);
+	for(var i=0; i<tabs.length; i++) {
+		var tab_elem = tabs[i];
+		var tab_body_id = tab_elem.dataset.tabBody;
+		var tab_body_elem  = document.getElementById(tab_body_id);
+		if(tab_elem.checked) {
+			tab_body_elem.style.display = "";
+		} else {
+			tab_body_elem.style.display = "none";
+		}
+	}
+}
