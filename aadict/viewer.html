@@ -17,11 +17,16 @@ ArcheAge (JP) 製作辞典＋ <br />
 </div>
 <div id="post">
 <div id="tabs">
-<span><input type="radio" name="tab" id="menu-tab" data-tab-body="menu" onchange="change_tab('tab')" checked="checked"/><label for="menu-tab">メニュー</label></span>
-<span><input type="radio" name="tab" id="hist-tab" data-tab-body="hist" onchange="change_tab('tab')" /><label for="hist-tab"> 履歴 </label></span>
-</div>
-<div id="menu"></div>
-<div id="hist"></div>
+	<div id=menu_sheet class=tab_sheet>
+		<input type=radio name=tab id=menu_tab class=tab_radio checked />
+		<label for=menu_tab id=menu_label class=tab_radio_label>メニュー</label>
+		<div id=menu class=tab_body></div>
+	</div>
+	<div id=hist_sheet class=tab_sheet>
+		<input type=radio name=tab id=hist_tab class=tab_radio />
+		<label for=hist_tab id=hist_label class=tab_radio_label>履歴</label>
+		<div id=hist class=tab_body></div>
+	</div>
 </div>
 </body>
 </html>

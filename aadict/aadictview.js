@@ -13,7 +13,6 @@ function aadict_init(data_filename, menu_filename, menu_id, result_id_, hist_id_
 	hist_id = hist_id_;
 	read_dict_data(data_filename);
 	read_menu(menu_filename, menu_id, result_id_);
-	change_tab("tab");
 	hist_init(hist_id_);
 }
 
@@ -50,21 +49,25 @@ function read_menu(filename, menu_id, result_id)
 			}
 		}
 		
-		var menu = "<ul>";
+		var checkbox_id_number = 0;
+		var menu = "<ul class=menu>";
 		while(menu_tree.length > 0) {
 			var group_name = menu_tree.shift();
 			var sub_items = menu_tree.shift();
-
+			var checkbox_id = "menu_checkbox_" + checkbox_id_number;
+			
 			menu += "<li>";
-			menu += "<span class=\"expander\" onclick=\"expdexp(this.nextSibling.nextSibling, this);\">+</span>";
-			menu += "<span class=\"clickable\" onclick=\"category_list('【分類】"+group_name+"', '"+result_id+"');\">"+group_name+"</span>";
-			menu += "<ul style=\"display:none;\">";
+			menu += "<input type=checkbox class=menu_checkbox id=" + checkbox_id + " checked />";
+			menu += "<label for=" + checkbox_id + " class=\"menu_checkbox_label expander\"></label>";
+			menu += "<span class=clickable onclick=\"category_list('【分類】"+group_name+"', '"+result_id+"');\">"+group_name+"</span>";
+			menu += "<ul class=sub_menu>";
 
-			for(var i=0; i<sub_items.length-1; i++) {
-				menu += "<li class=\"clickable\" onclick=\"category_list('【分類】"+group_name+"/"+sub_items[i]+"', '"+result_id+"');\">"+sub_items[i]+"</li>";
+			for(var i=0; i<sub_items.length; i++) {
+				menu += "<li class=clickable onclick=\"category_list('【分類】"+group_name+"/"+sub_items[i]+"', '"+result_id+"');\">"+sub_items[i]+"</li>";
 			}
 			
 			menu += "</ul></li>";
+			checkbox_id_number++;
 		}
 		menu += "</ul>";
 		document.getElementById(menu_id).innerHTML = menu;
@@ -108,7 +111,7 @@ function search(raw_key, result_id)
 		document.getElementById(result_id).innerHTML = "<div>" + target_string + "は見つかりませんでした</div>"
 		return;
 	}
-	document.getElementById(result_id).innerHTML = "<div>" + target_string + "の検索結果</div>" + basic_format(result);
+	document.getElementById(result_id).innerHTML = "<div>" + target_string + "の検索結果</div>" + items_format(result, true);
 	record_hist(raw_key);
 }
 
@@ -174,51 +177,18 @@ function match_by_item_ex(key)
 
 }
 
-function basic_format(result)
+function items_format(result, expand)
 {
 	var s = "";
-	s += "<div>"
-	for(var i in result) {
-		var r = result[i];
-		r = textToCDATA(r)
-		r = r.replace(/^[^【]+/, "<span class=\"clickable\" onclick=\"search_material('$&', 'result');\">$&</span>"+
-		" <span class=\"expander-triangle\" onclick=\"expdexp(this.nextSibling, this, ['▼', '▲']);\">▲</span>"+
-		"<pre style=\"display:block;\">");
-		r = replace_clickable(r, "【材料】", "search_item");
-		r = replace_clickable(r, "【配置材料】", "search_item");
-		r = replace_clickable(r, "【建造材料】", "search_item");
-		r = replace_clickable(r, "【収穫時獲得物】", "search_material");
-		r = replace_clickable(r, "【加工時獲得物】", "search_material");
-		r = replace_clickable(r, "【伐採時獲得物】", "search_material");
-		r = replace_clickable(r, "【採集時獲得物】", "search_material");
-		r = replace_clickable(r, "【獲得物】", "search_material");
-		r = replace_clickable(r, "【収穫物】", "search_material");
-		r = r.replace(/【/g, "\n    【");
-		r = r.replace(/▽/g, "\n        ▽");
-		r = r+"</pre>";
-		r = r + "\n \n";
-		s += "<div>" + r + "</div>";
+	if(expand) {
+		var checked = " checked";
+	} else {
+		var checked = "";
 	}
-	s += "</div>";
-	return s;
-}
 
-function escape_regexp(s)
-{
-	s = s.replace(/[\.\*\[\]\^\$\+\*\(\)\|\{\}\\]/g, "\\$&");
-	return s;
-}
-
-function category_list(key, result_id)
-{
-	var result = regexp_match(escape_regexp(key)+"(/|【|$)")
-	document.getElementById(result_id).innerHTML = "<div>" + key + "</div>" + list_format(result);
-}
-function list_format(result)
-{
-	var s = "";
 	for(var i in result) {
 		var r = result[i];
+		var checkbox_id = "item_detail_checkbox_id_"+i;
 		r = textToCDATA(r)
 		r.match(/^[^【]+/);
 		var item_name = RegExp.lastMatch;
@@ -236,14 +206,27 @@ function list_format(result)
 		r = r.replace(/▽/g, "\n        ▽");
 		r = r + "\n \n";
 		s += "<div>";
-		s += "<span class=\"clickable\" onclick=\"search_material('" + item_name + "', 'result');\">" + item_name + "</span>";
-		s += " <span class=\"expander-triangle\" onclick=\"expdexp(this.nextSibling, this, ['▼', '▲']);\">▼</span>";
-		s += "<pre style=\"display:none;\">";
+		s += "<span class=\"clickable\" onclick=\"search_material('" + item_name + "', 'result');\">" + item_name + "</span> ";
+		s += "<input type=checkbox id=" + checkbox_id + " class=item_detail_checkbox" + checked + " />";
+		s += "<label for=" + checkbox_id + " class=\"item_detail_label expander-triangle\"></label>";
+		s += "<pre class=item_detail_body>";
 		s += r;
 		s += "</pre>";
 		s += "</div>";
 	}
 	return s;
+}
+
+function escape_regexp(s)
+{
+	s = s.replace(/[\.\*\[\]\^\$\+\*\(\)\|\{\}\\]/g, "\\$&");
+	return s;
+}
+
+function category_list(key, result_id)
+{
+	var result = regexp_match(escape_regexp(key)+"(/|【|$)")
+	document.getElementById(result_id).innerHTML = "<div>" + key + "</div>" + items_format(result, false);
 }
 
 function replace_clickable(s, attr, search_func)
@@ -411,37 +394,4 @@ function textToCDATA(s)
 	s = s.replace(/>/g, "&gt;");
 	s = s.replace(/"/g, "&quot;");
 	return s;
-}
-
-function expdexp(t, m, s)
-{
-	if(arguments.length>=3) {
-		var expander_string = s[0];
-		var dexpander_string = s[1];
-	} else {
-		var expander_string = "+";
-		var dexpander_string = "-";
-	}
-	if(t.style.display=="none") {
-		t.style.display = "";
-		m.innerHTML = dexpander_string;
-	} else {
-		t.style.display = "none";
-		m.innerHTML = expander_string;
-	}
-}
-
-function change_tab(name)
-{
-	var tabs = document.getElementsByName(name);
-	for(var i=0; i<tabs.length; i++) {
-		var tab_elem = tabs[i];
-		var tab_body_id = tab_elem.dataset.tabBody;
-		var tab_body_elem  = document.getElementById(tab_body_id);
-		if(tab_elem.checked) {
-			tab_body_elem.style.display = "";
-		} else {
-			tab_body_elem.style.display = "none";
-		}
-	}
 }
