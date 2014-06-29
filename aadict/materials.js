@@ -8,23 +8,25 @@
 function material_view(data_file_name, arg, id)
 {
 	var root_item_name = get_query(arg, "q");
-	var result_element = document.getElementById(id);
-
-	var hook = (function(item_name, element) {
+	var hook = (function(item, id) {
 		return function(){
-				var material_tree = get_material_tree(item_name, 1);
-				
-				if(material_tree.length==0) {
-					element.innerHTML = "「" + item_name + "」は見つかりませんでした";
-				} else {
-					var table_format= format_material_table(material_tree);
-					var tree_format = format_material_tree(material_tree);
-					element.innerHTML = "「" + item_name + "」の材料ツリー</br>" + tree_format + table_format;
-				}
-			};
-		}) (root_item_name, result_element);
-
+			material_tree(item, id);
+		}
+	})(root_item_name, id);
 	read_dict_data(data_file_name, hook);
+}
+
+function material_tree(item_name, id)
+{
+	var material_tree = get_material_tree(item_name, 1);
+	
+	if(material_tree.length==0) {
+		document.getElementById(id).innerHTML = "「" + item_name + "」は見つかりませんでした";
+	} else {
+		var table_format= format_material_table(material_tree);
+		var tree_format = format_material_tree(material_tree);
+		document.getElementById(id).innerHTML = "「" + item_name + "」の材料ツリー</br>" + tree_format + table_format;
+	}
 }
 
 function get_query(query_string, key)

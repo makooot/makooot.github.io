@@ -79,7 +79,7 @@ function search(raw_key, result_id)
 {
 	var search_kind;
 	var key;
-	if(raw_key.match(/^(item:|material:|harvest:)(.*)/)) {
+	if(raw_key.match(/^(tree:|item:|material:|harvest:)(.*)/)) {
 		search_kind = RegExp.$1;
 		key = RegExp.$2;
 	} else{
@@ -90,6 +90,10 @@ function search(raw_key, result_id)
 	var target_string;
 	var key_string = textToCDATA(key);
 	switch(search_kind) {
+	case "tree:":
+		material_tree(key, result_id);
+		record_hist(raw_key);
+		return;
 	case "item:":
 		match_function = match_by_item_ex;
 		target_string = "アイテム「" + key_string + "」";
@@ -188,6 +192,7 @@ function items_format(result, expand)
 
 	for(var i in result) {
 		var r = result[i];
+		var has_material = r.match(/【材料】/);
 		var checkbox_id = "item_detail_checkbox_id_"+i;
 		r = textToCDATA(r)
 		r.match(/^[^【]+/);
@@ -206,9 +211,13 @@ function items_format(result, expand)
 		r = r.replace(/▽/g, "\n        ▽");
 		r = r + "\n \n";
 		s += "<div>";
-		s += "<span class=\"clickable\" onclick=\"search_material('" + item_name + "', 'result');\">" + item_name + "</span> ";
-		s += "<input type=checkbox id=" + checkbox_id + " class=item_detail_checkbox" + checked + " />";
-		s += "<label for=" + checkbox_id + " class=\"item_detail_label expander-triangle\"></label>";
+		s += item_name;
+		s += " <input type=checkbox id=" + checkbox_id + " class=item_detail_checkbox" + checked + " />";
+		s += "<label for=" + checkbox_id + " class=\"item_detail_label expander-triangle\"></label> ";
+		if(has_material) {
+			s += "<span class=tree_view_button onclick=\"search('tree:" + item_name + "', 'result')\"></span>";
+		}
+		s += " <span class=search_by_material_button onclick=\"search_material('" + item_name + "', 'result')\"></span>";
 		s += "<pre class=item_detail_body>";
 		s += r;
 		s += "</pre>";
@@ -378,10 +387,31 @@ function hist_to_html()
 	var histories = search_history.get();
 	for(var i=0; i<histories.length; i++) {
 		var search_key = histories[i];
-		var name = search_key;
+		if(search_key.match(/^(tree:|item:|material:|harvest:)(.*)/)) {
+			var search_kind = RegExp.$1;
+			var name = textToCDATA(RegExp.$2);
+			switch(search_kind) {
+			case "tree:":
+				var class_name = "tree_view_button";
+				break;
+			case "item:":
+				var class_name = "search_by_item_button";
+				break;
+			case "material:":
+				var class_name = "search_by_material_button";
+				break;
+			case "harvest:":
+				var class_name = "search_by_harvest_button";
+				break;
+			}
+			var name = "<span class=" + class_name + "></span> " + name;
+			
+		} else {
+			var name = textToCDATA(search_key);
+		}
 		s += "<li>" +
-			"<span class=\"clickable\" onclick=\"search('"+textToCDATA(search_key)+"','"+result_id+"');\">"+textToCDATA(name)+"</span> " +
-			"<span class=\"round-square\" onclick=\"delete_hist('"+textToCDATA(name)+"');\">×</span>" +
+			"<span class=\"clickable\" onclick=\"search('" + textToCDATA(search_key) + "','"+result_id+"');\"> " +name + "</span> " +
+			"<span class=\"round-square\" onclick=\"delete_hist('" + textToCDATA(search_key) + "');\">×</span>" +
 			"</li>";
 	}
 	s += "</ul>";

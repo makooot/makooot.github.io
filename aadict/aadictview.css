@@ -154,3 +154,47 @@ td, th {
 .item_detail_checkbox:checked ~ .item_detail_body {
 	display: block;
 }
+
+.tree_view_button:after {
+	content: "Ｔ";
+	font-size: smaller;
+	background-color: #060;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	width: 15px;
+	text-align: center;
+}
+
+.search_by_material_button:after {
+	content: "Ｐ";
+	font-size: smaller;
+	background-color: #808;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	width: 15px;
+	text-align: center;
+}
+
+.search_by_harvest_button:after {
+	content: "Ｈ";
+	font-size: smaller;
+	background-color: #cc0;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	width: 15px;
+	text-align: center;
+}
+
+.search_by_item_button:after {
+	content: "Ｉ";
+	font-size: smaller;
+	background-color: #a00;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	width: 15px;
+	text-align: center;
+}
