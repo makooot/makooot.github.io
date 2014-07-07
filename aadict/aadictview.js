@@ -7,11 +7,20 @@
 
 dictdata = "";
 hist_id = "";
-function aadict_init(data_filename, menu_filename, menu_id, result_id_, hist_id_)
+function aadict_init(args, data_filename, menu_filename, menu_id, result_id_, hist_id_)
 {
+	var search_word =  get_query(args, "q");
+	var search_func = null;
+	if(search_word) {
+		search_func = (function(q) {
+			return function() {
+				search(q, result_id_);
+			}
+		})(search_word);
+	}
 	result_id = result_id_;
 	hist_id = hist_id_;
-	read_dict_data(data_filename);
+	read_dict_data(data_filename, search_func);
 	read_menu(menu_filename, menu_id, result_id_);
 	hist_init(hist_id_);
 }

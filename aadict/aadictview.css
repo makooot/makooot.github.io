@@ -26,9 +26,12 @@
 	border: dotted 1px gray  ;
 	cursor: pointer;
 	margin: 0 5px 0 0;
+	color: black;
+	background-color: white;
 }
 .expander-triangle {
 	font-size: x-small;
+	padding: 2px;
 	cursor: pointer;
 	background-color: blue;
 	color: white;
@@ -68,7 +71,6 @@ td, th {
 .menu_checkbox_label:after {
 	content: "-"
 }
-
 .menu_checkbox:checked ~ .menu_checkbox_label:after {
 	content: "+"
 }
@@ -157,6 +159,8 @@ td, th {
 
 .tree_view_button:after {
 	content: "Ｔ";
+}
+.tree_view_button {
 	font-size: smaller;
 	background-color: #060;
 	color: white;
@@ -168,6 +172,8 @@ td, th {
 
 .search_by_material_button:after {
 	content: "Ｐ";
+}
+.search_by_material_button {
 	font-size: smaller;
 	background-color: #808;
 	color: white;
@@ -179,6 +185,8 @@ td, th {
 
 .search_by_harvest_button:after {
 	content: "Ｈ";
+}
+.search_by_harvest_button {
 	font-size: smaller;
 	background-color: #cc0;
 	color: white;
@@ -190,6 +198,8 @@ td, th {
 
 .search_by_item_button:after {
 	content: "Ｉ";
+}
+.search_by_item_button {
 	font-size: smaller;
 	background-color: #a00;
 	color: white;
