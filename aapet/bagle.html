@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>ArcheAge (JP) ペットベーグル計算機</title>
+<script type="text/javascript" src="bagle.js"></script>
+<link rel="stylesheet" href="bagle.css" type="text/css">
+</head>
+<body onload="draw('form', 'result', 'exptable');">
+<h1>ArcheAge (JP) ペットベーグル計算機</h1>
+<div id=form>
+<form id=pet-form>
+  ペットのレベル、経験値を入力してください<br>
+  <label id=pet-level-label>レベル <input id=pet-level-value type=text name=petlevel size=15></label><br />
+  <label id=pet-exp-label>経験値 <input id=pet-exp-value type=text name=petexp size=15></label><br />
+  <input id=calc-button type=button value="計算" onclick="calculate(petlevel.value, petexp.value, 'result', 'status', 'exptable')">
+</form>
+</div>
+<div id=result>
+  <div id=status>計算結果を表示します</div>
+  <span class=result-box data-to-level=10></span>
+  <span class=result-box data-to-level=20></span>
+  <span class=result-box data-to-level=30></span>
+  <span class=result-box data-to-level=40></span>
+  <span class=result-box data-to-level=50></span>
+</div>
+<div id=exptable></div>
+</body>
+</html>

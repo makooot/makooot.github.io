@@ -1,0 +1,75 @@
+
+#pet_exp_table {
+  border-collapse: collapse;
+  border: solid 2px black;
+}
+
+#pet_exp_table th {
+  background-color: #040;
+  color: white;
+  text-align: center;
+  border: solid 1px black;
+}
+
+#pet_exp_table td {
+  text-align: right;
+border: solid 1px black;
+}
+
+tbody tr:nth-of-type(2n) {
+  background-color: #d4d4d4;
+  color: black;
+}
+
+tbody tr:nth-of-type(2n+1) {
+  background-color: white;
+  color: black;
+}
+
+#result {
+  background-color: #efe;
+  padding: 10px;
+  margin: 10px 0;
+}
+#status {
+  font-weight: bolder;
+}
+.result-box {
+  vertical-align: text-top;
+  display: inline-block;
+  width: 160px;
+  min-height: 160px;
+  border: solid 1px black;
+}
+
+.done-stamp:before {
+  content: "澄"
+}
+.done-stamp {
+  color: red;
+  border: solid 2px red;
+  border-radius: 40px;
+  font-size: 80px;
+}
+
+#pet-form {
+  display: inline-block;
+  border: solid 1px black;
+  line-height: 250%;
+  padding: 10px;
+}
+
+#calc-button {
+  width: 150px;
+}
+
+.result-headder {
+  display: block;
+  background-color: #040;
+  color: white;
+  font-weight: bolder;
+}
+
+.result-supplement {
+  font-size: smaller;
+}
