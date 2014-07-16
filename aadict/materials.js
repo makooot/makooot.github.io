@@ -18,8 +18,8 @@ function material_view(data_file_name, arg, id)
 
 function material_tree(item_name, id)
 {
-	var material_tree = get_material_tree(item_name, 1);
-	
+	var material_tree = get_material_tree(item_name);
+
 	if(material_tree.length==0) {
 		document.getElementById(id).innerHTML = "「" + item_name + "」は見つかりませんでした";
 	} else {
@@ -42,26 +42,31 @@ function get_query(query_string, key)
 
 function get_material_tree(item, number)
 {
-	if(in_exclude_list(item)) {
-		return [item, number, [], []];
-	}
 	var result = match_by_item(item);
 	if(result.length==0) {
 		return [];
 	}
 	var s = result[0];
 	var ary = [];
-	
+
 	s.match(/^[^【]+/);
 	ary.push(RegExp.lastMatch);
-	
+
 	if(s.match(/【獲得数】([0-9]+)/)) {
-		var times = Math.ceil(number / parseInt(RegExp.$1));
+		var number_of_acquired = parseInt(RegExp.$1)
 	} else {
-		times = number;
+		var number_of_acquired = 1
 	}
-	ary.push(number);	
-	
+	if(typeof(number)!="number") {
+		number = number_of_acquired
+	}
+	var times = Math.ceil(number / number_of_acquired);
+	ary.push(number);
+
+	if(in_exclude_list(item)) {
+		return [item, number, [], []];
+	}
+
 	if(s.match(/【労働力】([0-9]+)/)) {
 		ary.push(["stamina", parseInt(RegExp.$1) * times]);
 	} else if(s.match(/【価格】([^【]+)/)) {
@@ -90,7 +95,7 @@ function get_material_tree(item, number)
 	} else {
 		ary.push([]);
 	}
-	
+
 	var material_array = [];
 	if(s.match(/【材料】([^【]*)/)) {
 		var s = RegExp.$1;
@@ -160,9 +165,9 @@ function format_material_tree(tree)
 		"<tr><td>" + name + "</td><td>" + number + "</td><td>" + to_cost_string(cost) + "</td></tr>"
 	]);
 	lines = lines.concat(format_tree(sub_materials, ""));
-	
+
 	lines.push(	"</table>");
-	
+
 	return lines.join("");
 }
 
@@ -184,7 +189,7 @@ function format_tree(tree, super_branch)
 			lines = lines.concat(format_tree(sub_materials, super_branch+(tree.length==0 ? "　" : "│")));
 		}
 	}
-	
+
 	return　lines;
 }
 
