@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-(commin soon))
+(coming soon))
